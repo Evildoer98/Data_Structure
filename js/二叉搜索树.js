@@ -173,4 +173,192 @@ function BinarySerachTree () {
     }
 
     // 最大值&最小值
+    /**
+     * 
+     * 依次向左找到最左边的结点就是最小值
+     * 依次向右找到最右边的结点就是最大值
+     * 
+     */
+    BinarySerachTree.prototype.min = function () {
+        var node = this.root
+        while (node.left !== null) {
+            node = node.left
+        }
+        return node.value
+    }
+    BinarySerachTree.prototype.max = function () {
+        var node = this.root
+        while (node.right !== null) {
+            node = node.right
+        }
+        return node.value
+    }
+
+    // 搜索特定值
+    /**
+     * 
+     * 递归必须有退出的条件，有两种情况
+     *      node === null，也就是后面不再有结点的时候
+     *      找到对应的 key，也就是 node.key === key 的时候
+     * 
+     * 在其他情况下，根据 node 的 key 和传入的 key 进行比较来决定向左还是向右查找
+     *      如果 node.key > key，那么说明传入的值更小，需要向左查找
+     *      如果 node.key < key，那么说明传入的值更大，需要向右查找
+     *      
+     * 非递归方法
+     * BinarySerachTree.prototype.search = function (key) {
+     *  var node = this.root
+     *  while (node !== null) {
+     *      if (node.key > key) {
+     *          node = node.left
+     *      } else if (node.key < key) {
+     *          node = node.right
+     *      } else {
+     *          return true
+     *      }
+     *  }
+     *  return false
+     * }
+     */
+    
+    BinarySerachTree.prototype.search = function (key) {
+        return this.searchNode(this.root, key)
+    }
+    BinarySerachTree.prototype.searchNode = function (node, key) {
+        // 如果传入的 node 为 null，那么就退出递归
+        if (node === null) {
+            return false
+        }
+        // 判断 node 结点的值和传入的 key 的大小
+        if (node.key > key) {
+            // 传入的 key 较小，向左边继续查找
+            return this.searchNode(node.left, key)
+        } else if (node.key < key) {
+            // 传入的 key 较大时，向左边继续查找
+            return this.searchNode(node.right, key)
+        } else {
+            // 相同
+            return true
+        }
+    }
+
+    // 删除结点
+    /**
+     * 
+     * 删除结点的思路：
+     *  删除结点要从查找要删的结点开始，找到结点后，需要考虑三种情况
+     *      1. 该结点没有子结点
+     *      2. 该结点只有一个子结点
+     *      3. 该结点有两个子结点
+     * 
+     * 解析：
+     * 变量的意义：
+     * current：用于一会儿找到的要删除的结点对应的 node
+     * parent：用于保存 current 结点的父结点，因为如果 current 有子节点，那么在删除 current 结点的时候，
+     *          必然需要将 parent 的left 或者 right 指向它的某一个子节点，所以需要保存起来 current 的 parent（树中的结点关系不能向上的，和链表非常相似）
+     * isLeftChild：boolean 类型，它用于记录我们是在 current 是在父节点的左侧还是右侧，以使到时候设置 parent 的 left 或者 right
+     * 查找结点：
+     *   依次向下查找结点，同时记录 current/parent/isLeftChild
+     *   如果遍历到 current === null，那么说明在二叉搜索树中没有该 key，直接返回 false 即可
+     *   其余情况：
+     *      情况一：没有子结点
+     *          这种情况相对比较简单，检测 current 的 left 以及 right 是否都为 null 
+     *          都为 null 之后还要检测一个东西，就是是否 current 就是根，都为 null，并且为根，那么相当于要清空二叉树
+     *          否则就把父结点的 left 或者 right 字段设置为 null 即可
+     * 
+     * 
+     */
+    BinarySerachTree.prototype.remove = function (key) {
+        // 定义临时保存的变量
+        var current = this.root
+        var parent = this.root
+        var isLeftChild = true
+        // 开始查找结点
+        while (current.key !== key) {
+            parent = current
+            if (key < current.key) {
+                isLeftChild = true
+                current = current.left
+            } else {
+                isLeftChild = false
+                current = current.right
+            }
+            // 如果发现 current 已经指向 null，那么说明没有找到要删除的数据
+            if (current === null) {
+                return false
+            }
+        }
+
+        // 删除的结点是叶结点
+        if (current.left === null && current.right === null) {
+            if (current === this.root) {
+                this.root = null
+            } else if (isLeftChild) {
+                parent.left = null
+            } else {
+                parent.right = null
+            }
+        }
+        // 删除有一个子结点的结点
+        else if (current.right === null) {
+            if (current === this.root) {
+                this.root = current.left
+            } else if (isLeftChild) {
+                parent.left = current.left
+            } else {
+                parent.right = current.left
+            }
+        }
+        else if (current.left === null) {
+            if (current === this.root) {
+                this.root = current.right
+            } else if (isLeftChild) {
+                parent.left = current.right
+            } else {
+                parent.right = current.right
+            }
+        }
+        // 删除有两个子结点的结点
+        else {
+            // 获取后续结点
+            var successor = this.getSuccessor (current)
+            // 判断是否是根结点
+            if (current === this.root) {
+                this.root = successor
+            } else if (isLeftChild) {
+                parent.left = successor
+            } else {
+                parent.right = successor
+            }
+            // 将删除结点的左子树赋值给 successor
+            successor.left = current.left
+        }
+        // 
+        return true
+    }
+    // 找后继的方法
+    BinarySerachTree.prototype.getSuccessor = function (delNode) {
+         // 1.使用变量保存临时的节点
+        var successorParent = delNode
+        var successor = delNode
+        // 要从右子树开始找
+        var current = delNode.right 
+
+        // 2.寻找节点
+        while (current != null) {
+            successorParent = successor
+            successor = current
+            current = current.left
+        }
+
+        // 3.如果是删除图中15的情况, 还需要如下代码
+        if (successor != delNode.right) {
+            successorParent.left = successor.right
+            successor.right = delNode.right
+        }
+        return successor
+    }
+
+
+
 }
