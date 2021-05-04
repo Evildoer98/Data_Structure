@@ -351,14 +351,11 @@ function BinarySerachTree () {
             current = current.left
         }
 
-        // 3.如果是删除图中15的情况, 还需要如下代码
+        // 3.如果是删除的情况,
         if (successor != delNode.right) {
             successorParent.left = successor.right
             successor.right = delNode.right
         }
         return successor
     }
-
-
-
 }
