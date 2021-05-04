@@ -64,7 +64,7 @@ function Graph () {
         return colors
     }
 
-    // 广度优先搜索算法
+    // 广度优先搜索
     /**
      * 
      * 广度优先算法会先从指定的第一个顶点开始遍历图，先访问其所有的相邻点，就像一次访问图的一层
@@ -109,5 +109,40 @@ function Graph () {
         }
     }
 
-    
+    // 深度优先搜索
+    /**
+     * 
+     * 深度优先搜索思路：将会从第一个指定的顶点开始遍历图，沿着路径知道这条路径最后被访问了
+     * 接着原路回退并探索下一条路径
+     * 
+     */
+    Graph.prototype.dfs = function (handler) {
+        // 初始化颜色
+        var color = this.initializeColor()
+        // 遍历所有的顶点，开始访问
+        for (let i = 0; i < this.vertexes.length; i++) {
+            if (color[this.vertexes[i]] === "white") {
+                this.dfsVisit(this.vertexes[i], color, handler)
+            }
+        }
+    }
+    // dfs 的递归调用方法
+    Graph.prototype.dfsVisit = function (u, color, handler) {
+        // 将 u 的颜色设置为灰色
+        color[u] = "gray"
+        // 处理 u 顶点
+        if (hanlder) {
+            handler(u)
+        }
+        // u 的所有邻接顶点的访问
+        var uAdj = this.adjList.get(u)
+        for (let i = 0; i < array.length; i++) {
+            var w = uAdj[i]
+            if (color[w] === "white") {
+                this.dfsVisit(w, color, handler)
+            }
+        }
+        // 将 u 设置为黑色
+        color[u] = "black"
+    }
 }
